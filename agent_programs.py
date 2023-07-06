@@ -23,6 +23,9 @@ def test_behaviour(percepts, actuators):
 
     return actions
 
+#Function - change_direction
+#takes a parameter old_direction and returns a random DIRECTION
+#excluding old_direction
 def change_direction(old_direction):
     new_direction = random.choice(DIRECTIONS)
     while old_direction == random.choice(DIRECTIONS):
