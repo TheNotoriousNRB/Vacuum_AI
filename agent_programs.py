@@ -30,7 +30,6 @@ def change_direction(old_direction):
     new_direction = random.choice(DIRECTIONS)
     while old_direction == random.choice(DIRECTIONS):
         new_direction = random.choice(DIRECTIONS)
-    
     return new_direction;
 
 
@@ -55,7 +54,6 @@ def simple_reflex_behaviour(percepts, actuators):
     
     if percepts['bumper-sensor-north'] == True:
         new_direction = change_direction('north')
-        print(new_direction)
         actions.append('change-direction-{0}'.format(new_direction))
 
     if percepts['bumper-sensor-south'] == True:
@@ -85,7 +83,6 @@ def simple_reflex_behaviour(percepts, actuators):
     return actions
 
 
-
 """
 Model-based reflex agent: 
 - The agent keeps track of the walls it crashed against by using a GridMap
@@ -93,7 +90,12 @@ Model-based reflex agent:
 the agent will change direction
 - In all the other situations, the agent will behave like the simple-reflex agent
 """
+w_env = math.floor(DISPLAY_WIDTH/TILE_SIZE)
+h_env = math.floor(DISPLAY_WIDTH/TILE_SIZE)
+environment_map = GridMap(w_env, h_env, False)
+
 def model_based_reflex_behaviour(percepts, actuators):
+    #Model Based reflex agent initialized!
     actions = []
 
     return actions
