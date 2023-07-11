@@ -49,36 +49,23 @@ def simple_reflex_behaviour(percepts, actuators):
     
     if percepts['dirt-sensor-center'] == True:
         actions.append('activate-suction-mechanism')
-    else:
+    elif actuators['suction-power'] == 1:
         actions.append('deactivate-suction-mechanism')
-    
-    if percepts['bumper-sensor-north'] == True:
-        new_direction = change_direction('north')
-        actions.append('change-direction-{0}'.format(new_direction))
 
-    if percepts['bumper-sensor-south'] == True:
-        new_direction = change_direction('south')
-        actions.append('change-direction-{0}'.format(new_direction))
+    cur_direction = actuators['wheels-direction']
+    new_direction = cur_direction
+    if percepts['bumper-sensor-{0}'.format(cur_direction)] == True:
+        directions = DIRECTIONS.copy()
+        directions.remove(cur_direction)
+        new_direction = random.choice(directions)
 
-    if percepts['bumper-sensor-east'] == True:
-        new_direction = change_direction('east')
-        actions.append('change-direction-{0}'.format(new_direction))
+    for dir in directions:
+        if percepts['dirt-sensor-{0}'.format(dir)] == True:
+            new_direction = dir
+            break
 
-    if percepts['bumper-sensor-west'] == True:
-        new_direction = change_direction('west')
+    if new_direction != cur_direction:
         actions.append('change-direction-{0}'.format(new_direction))
-
-    if percepts['dirt-sensor-north'] == True:
-        actions.append('change-direction-north')
-    
-    if percepts['dirt-sensor-east'] == True:
-        actions.append('change-direction-east')
-    
-    if percepts['dirt-sensor-west'] == True:
-        actions.append('change-direction-west')
-    
-    if percepts['dirt-sensor-south'] == True:
-        actions.append('change-direction-south')
 
     return actions
 
@@ -97,7 +84,6 @@ environment_map = GridMap(w_env, h_env, False)
 def model_based_reflex_behaviour(percepts, actuators):
     #Model Based reflex agent initialized!
     actions = []
-
     return actions
 
 """
