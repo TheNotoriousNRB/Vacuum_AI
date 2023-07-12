@@ -59,7 +59,7 @@ def simple_reflex_behaviour(percepts, actuators):
         directions.remove(cur_direction)
         new_direction = random.choice(directions)
 
-    for dir in directions:
+    for dir in DIRECTIONS:
         if percepts['dirt-sensor-{0}'.format(dir)] == True:
             new_direction = dir
             break
