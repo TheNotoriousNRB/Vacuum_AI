@@ -81,9 +81,68 @@ w_env = math.floor(DISPLAY_WIDTH/TILE_SIZE)
 h_env = math.floor(DISPLAY_WIDTH/TILE_SIZE)
 environment_map = GridMap(w_env, h_env, False)
 
+def future_state(model, cur_location, cur_direction):
+    offset = {
+        'north' : (0, -1),
+        'south' : (0, 1),
+        'east' : (1, 0),
+        'west' : (-1, 0)
+    }
+    cur_x, cur_y = cur_location
+    #future location
+    new_x, new_y = (cur_x + offset[cur_direction][0], cur_y+offset[cur_direction][1])
+
+    try:
+        value = model.get_item_value(new_x, new_y)
+        new_location = (new_x, new_y)
+    except:
+        #If here, then the next location is out of bounds
+        #Assume it as a wall. 
+        value = 'W'
+        new_location = None
+
+    return value, new_location
+
 def model_based_reflex_behaviour(percepts, actuators):
     #Model Based reflex agent initialized!
-    actions = []
+    actions = simple_reflex_behaviour(percepts, actuators)
+
+    cur_location = percepts['location-sensor']
+    cur_direction = actuators['wheels-direction']
+
+    #In case of collision detected
+    #Update the eivironment model
+    if percepts['bumper-sensor-{0}'.format(cur_direction)] == True:
+        #Get the next location
+        _ , future_location = future_state(environment_map, cur_location, cur_direction)
+        #If the location is out of bounds, set it as a Wall in the model
+        if future_location is not None:
+            environment_map.set_item_value(future_location[0], future_location[1], 'W')
+    
+    #Check if there is any change-direction action from the simple_reflex_behaviour
+    new_direction = cur_direction
+    for action in actions:
+        if action.startswith('change-direction'):
+            token = action.split('-')
+            new_direction = token[2]
+            actions.remove(action)
+    
+    valid_directions = []
+    #For each direction, check if there is any wall
+    for direction in DIRECTIONS:
+        future_state_value, _ = future_state(environment_map, cur_location, direction)
+        #If there is no wall, it can be a valid choice for direction
+        if future_state_value != 'W':
+            valid_directions.append(direction)
+    
+    #Check if direction obtained from simple_reflex_behaviour is valid
+    if new_direction not in valid_directions:
+        new_direction = random.choice(valid_directions)
+
+    #If we've changed the direction, append action to change the direction
+    if new_direction != cur_direction:
+        actions.append('change-direction-{0}'.format(new_direction))
+
     return actions
 
 """
