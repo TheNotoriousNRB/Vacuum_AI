@@ -206,6 +206,7 @@ filtered list. If there are no unexplored cells, min_dist is set to a high value
 reflecting the notion that the agent values smaller distances to unexplored cells.
 """
 def utility_based_behaviour(percepts, actuators):
+    #utility based agent initialized
     actions = []
     
     return actions
