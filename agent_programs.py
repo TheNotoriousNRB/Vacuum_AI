@@ -79,7 +79,7 @@ the agent will change direction
 """
 w_env = math.floor(DISPLAY_WIDTH/TILE_SIZE)
 h_env = math.floor(DISPLAY_WIDTH/TILE_SIZE)
-environment_map = GridMap(w_env, h_env, False)
+environment_map = GridMap(w_env, h_env, None)
 
 def future_state(model, cur_location, cur_direction):
     offset = {
@@ -156,9 +156,38 @@ it will proceed in the same direction)
 """
 def goal_based_behaviour(percepts, actuators):
     #Goal Based Agent Initialized
-    
-    actions = []
 
+    actions = model_based_reflex_behaviour(percepts, actuators)
+
+    #Update current cell as visited by X
+    agent_location = percepts['location-sensor']
+    environment_map.set_item_value(agent_location[0], agent_location[1], 'X')
+   
+    #Check for change direction action 
+    cur_direction = actuators['wheels-direction']
+    new_direciton = cur_direction
+
+    for action in actions:
+        if action.startswith('change-direction'):
+            token = action.split('-')
+            new_direciton = token[2]
+            actions.remove(action)
+
+    valid_direction = []
+    for direction in DIRECTIONS:
+        future_state_value, _ = future_state(environment_map, agent_location, direction)
+        if future_state_value is None:
+            valid_direction.append(direction)
+    
+    if len(valid_direction) > 0 and new_direciton not in valid_direction:
+        new_direciton = random.choice(valid_direction)
+
+    if new_direciton != cur_direction:
+        actions.append('change-direction-{0}'.format(new_direciton))
+    
+    if len(environment_map.find_value(None)) == 0:
+        actions.append('stop-cleaning')
+    
     return actions
 
 """
