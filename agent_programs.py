@@ -155,6 +155,8 @@ it will proceed in the same direction)
 - The agent will stop cleaning once the environment is fully explored
 """
 def goal_based_behaviour(percepts, actuators):
+    #Goal Based Agent Initialized
+    
     actions = []
 
     return actions
