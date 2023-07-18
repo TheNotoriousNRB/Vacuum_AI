@@ -6,7 +6,7 @@ if __name__ == "__main__":
     # creating the vacuum agent
     # To test the different agent programs, change the function passed 
     # as parameter when instantiating the class VacuumAgent
-    agent = VacuumAgent(simple_reflex_behaviour)
+    agent = VacuumAgent(utility_based_behaviour)
 
     # running the game with the instantiated agent
     # DO NOT EDIT THIS INSTRUCTION!
