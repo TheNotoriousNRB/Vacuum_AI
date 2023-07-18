@@ -205,9 +205,82 @@ filtered list. If there are no unexplored cells, min_dist is set to a high value
 - The utility value is determined as -1 multiplied by min_dist, 
 reflecting the notion that the agent values smaller distances to unexplored cells.
 """
+def utility_function(model, location, direction):
+    x, y = location
+    # take the cells in the given direction
+    if direction == 'north':
+        cells = model.get_column(x)
+        cells = np.flip(cells[0:y])
+    elif direction == 'south':
+        cells = model.get_column(x)
+        cells = cells[y+1:]
+    elif direction == 'west':
+        cells = model.get_row(y)
+        cells = np.flip(cells[0:x])
+    elif direction == 'east':
+        cells = model.get_row(y)
+        cells = cells[x+1:]
+    else:
+        cells = []
+    
+    # remove the cells obstructed by a wall
+    filtered_cells = []
+    for cell in cells:
+        if cell != 'W':
+            filtered_cells.append(cell)
+        else:
+            # wall
+            break
+    
+    # check if there is dirt in that direction
+    for cell in cells:
+        if cell == 'D':
+            # there is dirt, return high utility
+            return 999
+    
+    # compute the min distance from unexplored cells
+    min_dist = 999
+    i = 0
+    for cell in filtered_cells:
+        if cell is None:
+            min_dist = i
+            break
+        i += 1
+
+    # return the utility as -1*min_dist
+    return -1*min_dist
+
 def utility_based_behaviour(percepts, actuators):
-    #utility based agent initialized
-    actions = []
+   # we can start from the actions determined by the goal-based agent
+    # doing this will also update the map with walls and explored cells
+    actions = goal_based_behaviour(percepts, actuators)
+
+    # we update the environment map with information about the dirt on adjacent cells
+    agent_location = percepts['location-sensor']
+    for direction in DIRECTIONS:
+        if percepts['dirt-sensor-{0}'.format(direction)] == True:
+            _, new_location = future_state(environment_map, agent_location, direction)
+            environment_map.set_item_value(new_location[0], new_location[1], 'D')
+
+    # we remove from the actions any change of direction
+    # as we determine the best direction based on the utility function
+    for action in actions:
+        if action.startswith('change-direction'):
+            actions.remove(action)
+    
+    # we determine the best direction
+    cur_direction = actuators['wheels-direction']
+    max_value = None
+    best_dir = None
+    for direction in DIRECTIONS:
+        cur_utility = utility_function(environment_map, agent_location, direction)
+        if max_value is None or cur_utility > max_value:
+            max_value = cur_utility
+            best_dir = direction
+    
+    # if we changed direction, we add an action to change it
+    if best_dir != cur_direction:
+        actions.append('change-direction-{0}'.format(best_dir))
     
     return actions
     
